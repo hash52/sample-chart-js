@@ -21,6 +21,8 @@ const config = {
     options: options
 };
 
+const noTitle = '無題';
+
 let graph;
 
 let elDatasetTemplate;
@@ -80,7 +82,7 @@ function removeDataset(event) {
     removedDataset.parentNode.removeChild(removedDataset);
 }
 
- //項目数を取得する
+//項目数を取得する
 function countNumOfDataset() {
     return document.getElementsByClassName('dataset').length;
 }
@@ -108,7 +110,8 @@ function gettNumOfTargetDataset(dataset) {
 
 function setGraphData() {
     let graph_setting = document.forms['graph-setting'];
-    config.options.title.text = graph_setting.elements['title'].value;
+    //title未入力時はnoTitleをタイトルにする
+    config.options.title.text = graph_setting.elements['title'].value ? graph_setting.elements['title'].value : noTitle;
     data.labels = [];
     data.datasets[0].data = [];
     data.datasets[0].backgroundColor = [];
@@ -117,12 +120,13 @@ function setGraphData() {
         //FIXME
         //data.labels = graph_setting.elements['label[]'].values みたいな感じでループを回さずに取りたい
         for (let i = 0; i < graph_setting.getElementsByClassName('dataset').length; i++) {
-            data.labels.push(graph_setting.elements['label[]'][i].value)
+            //label未入力時はnumOfDatasetStringをlabelにする
+            data.labels.push(graph_setting.elements['label[]'][i].value ? graph_setting.elements['label[]'][i].value : graph_setting.getElementsByClassName('dataset')[i].querySelector("input[name='label[]']").placeholder)
             data.datasets[0].backgroundColor.push(graph_setting.elements['color[]'][i].value)
             data.datasets[0].data.push(graph_setting.elements['data[]'][i].value)
         }
-    }else{
-        data.labels.push(graph_setting.elements['label[]'].value)
+    } else {
+        data.labels.push(graph_setting.elements['label[]'].value ? graph_setting.elements['label[]'].value : replaceTemplate(numOfDatasetString, { numOfDataset: 1 }))
         data.datasets[0].backgroundColor.push(graph_setting.elements['color[]'].value)
         data.datasets[0].data.push(graph_setting.elements['data[]'].value)
     }

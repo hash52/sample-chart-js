@@ -60,13 +60,14 @@ function setElement(){
 
 function appendDataset(){
     let fragment = document.createDocumentFragment();
-    fragment.appendChild(document.importNode(elDatasetTemplate, true));
+    let clone = document.importNode(elDatasetTemplate, true);
+    clone.querySelector("input[name='label[]']").placeholder = replaceTemplate(clone.querySelector("input[name='label[]']").placeholder, {numOfDataset: 1})
+    fragment.appendChild(clone);
     document.getElementById('datasets').appendChild(fragment);
 }
 
 function setGraphData(){
     let graph_setting = document.forms['graph-setting'];
-
     config.options.title.text = graph_setting.elements['title'].value;
     data.labels = [];
     data.datasets[0].data = [];
@@ -80,5 +81,15 @@ function setGraphData(){
         data.datasets[0].data.push(graph_setting.elements['data[]'][i].value)
     }
 }
+
+/*
+    args1: "My name is ${hoge}. I'm ${age}." , args2: {hoge: "Yamazaki", age: 27})
+    return "My name is Yamazaki. I'm 27."
+*/
+function replaceTemplate(string, values){
+    return string.replace(/\$\{(.*?)\}/g, function(all, key){
+      return Object.prototype.hasOwnProperty.call(values, key) ? values[key] : "";
+    });
+  }
 
 

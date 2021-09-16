@@ -19,14 +19,16 @@ const data = {
 };
 
 const config = {
-    type: 'doughnut',
+    type: 'pie',
     data: data,
 };
 
 window.onload = function () {
-    var myChart = new Chart(
-        document.getElementById('myChart'),
-        config
-    );
+    document.getElementById('draw').addEventListener('click',function(){
+        new Chart(
+            document.getElementById('myChart'),
+            config
+        );  
+    })
 }
 

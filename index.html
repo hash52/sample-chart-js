@@ -17,8 +17,49 @@
     <div class="container">
         <div class="row">
             <div class="col">
-                
-                <button type="submit" id="draw" class="btn btn-primary">描画する</button>
+                <h2 class="mb-3">設定</h2>
+                <form name="graph-setting">
+                    <h3>
+                        <label for="title">タイトル</label>
+                    </h3>
+                    <div class="input-group mb-3">
+                        <input type="text" name="title" id="title" class="form-control" placeholder="グラフのタイトル">
+                    </div>
+                    <h3>
+                        データ
+                    </h3>
+                    <p>「項目名」「値」「色」を設定して下さい。項目はいくつでも増やせます。</p>
+                    <div class="dataset">
+                        <div class="input-group mb-3">
+                            <input type="text" name="label[]" class="form-control" placeholder="項目1">
+                        </div>
+                        <div class="input-group mb-3">
+                            <input type="text" name="data[]" class="form-control col" placeholder="0">
+                            <input type="color" name="color[]" class="form-control col">
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="dataset">
+                        <div class="input-group mb-3">
+                            <input type="text" name="label[]" class="form-control" placeholder="項目2">
+                        </div>
+                        <div class="input-group mb-3">
+                            <input type="text" name="data[]" class="form-control col" placeholder="0">
+                            <input type="color" name="color[]" class="form-control col">
+                        </div>
+                    </div>
+                    <hr>
+                    <div class="dataset">
+                        <div class="input-group mb-3">
+                            <input type="text" name="label[]" class="form-control" placeholder="項目3">
+                        </div>
+                        <div class="input-group mb-3">
+                            <input type="text" name="data[]" class="form-control col" placeholder="0">
+                            <input type="color" name="color[]" class="form-control col">
+                        </div>
+                    </div>
+                    <button type="button" id="draw" class="btn btn-primary">描画する</button>
+                </form>
 
             </div>
             <div class="col">

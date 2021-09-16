@@ -28,8 +28,7 @@ let elDrawButton;
 let elAddDatasetButton;
 
 window.onload = function () {
-    setElement();
-    appendDataset();
+    setElements();
 
     elDrawButton.addEventListener('click', function () {
         setGraphData();
@@ -52,18 +51,30 @@ window.onload = function () {
 }
 
 
-function setElement(){
+function setElements(){
     elDatasetTemplate = document.getElementById("dataset-template").content;
-    elAddDatasetButton = document.getElementById('add-dataset');
     elDrawButton = document.getElementById('draw');
+    elAddDatasetButton = document.getElementById('add-dataset');
 }
 
 function appendDataset(){
     let fragment = document.createDocumentFragment();
     let clone = document.importNode(elDatasetTemplate, true);
     clone.querySelector("input[name='label[]']").placeholder = replaceTemplate(clone.querySelector("input[name='label[]']").placeholder, {numOfDataset: 1})
+    clone.querySelector('input[name="remove-dataset"]').addEventListener('click', function(e){
+        removeDataset(e);
+    })
     fragment.appendChild(clone);
     document.getElementById('datasets').appendChild(fragment);
+}
+
+function removeDataset(event){
+    let i = 0;
+    while(!event.path[i].classList.contains('dataset')){
+        i++;
+    }
+    let removedDataset = event.path[i];
+    removedDataset.parentNode.removeChild(removedDataset);
 }
 
 function setGraphData(){

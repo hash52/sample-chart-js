@@ -29,15 +29,29 @@
                         データ
                     </h3>
                     <p>「項目名」「値」「色」を設定して下さい。項目はいくつでも増やせます。</p>
-                    <div id="datasets"></div>
+                    <div id="datasets">
+                        <div class="dataset">
+                            <div class="input-group mb-3">
+                                <input type="text"name="label[]" class="form-control" placeholder="項目1">
+                            </div>
+                            <div class="input-group mb-3">
+                                <input type="number" name="data[]" class="form-control col" placeholder="0">
+                                <input type="color" name="color[]" class="form-control col">
+                            </div>
+                            <hr>
+                        </div>
+                    </div>
                     <template id="dataset-template">
                         <div class="dataset">
                             <div class="input-group mb-3">
                                 <input type="text"name="label[]" class="form-control" placeholder="項目${numOfDataset}">
                             </div>
-                            <div class="input-group mb-3">
+                            <div class="input-group mb-2">
                                 <input type="number" name="data[]" class="form-control col" placeholder="0">
                                 <input type="color" name="color[]" class="form-control col">
+                            </div>
+                            <div class="text-right">
+                                <input type="checkbox" name="remove-dataset">この項目を削除する
                             </div>
                             <hr>
                         </div>

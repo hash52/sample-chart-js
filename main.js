@@ -8,7 +8,7 @@ const data = {
     }],
 };
 
-let options = {
+const options = {
     title:{
         display: true,
         text: ''
@@ -27,7 +27,7 @@ window.onload = function () {
     document.getElementById('draw').addEventListener('click', function () {
         let graph_setting = document.forms['graph-setting'];
 
-        options.title.text = graph_setting.elements['title'].value;
+        config.options.title.text = graph_setting.elements['title'].value;
         data.labels = [];
         data.datasets[0].data = [];
         data.datasets[0].backgroundColor = [];

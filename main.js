@@ -27,6 +27,8 @@ let elDatasetTemplate;
 let elDrawButton;
 let elAddDatasetButton;
 
+const numOfDatasetString = "項目${numOfDataset}";
+
 window.onload = function () {
     setElements();
 
@@ -60,7 +62,7 @@ function setElements(){
 function appendDataset(){
     let fragment = document.createDocumentFragment();
     let clone = document.importNode(elDatasetTemplate, true);
-    clone.querySelector("input[name='label[]']").placeholder = replaceTemplate(clone.querySelector("input[name='label[]']").placeholder, {numOfDataset: 1})
+    clone.querySelector("input[name='label[]']").placeholder = replaceTemplate(numOfDatasetString, {numOfDataset: countNumOfDataset() + 1})
     clone.querySelector('input[name="remove-dataset"]').addEventListener('click', function(e){
         removeDataset(e);
     })
@@ -74,7 +76,31 @@ function removeDataset(event){
         i++;
     }
     let removedDataset = event.path[i];
+    rewriteBehindNumOfDataset(removedDataset);
     removedDataset.parentNode.removeChild(removedDataset);
+}
+
+function countNumOfDataset(){
+    return document.getElementsByClassName('dataset').length;
+}
+
+function rewriteBehindNumOfDataset(elDataset){
+    let child = elDataset.nextElementSibling;
+    let counter = 0;
+    while(child){
+        child.querySelector("input[name='label[]']").placeholder = replaceTemplate(numOfDatasetString, {numOfDataset: gettNumOfTargetDataset(child) - 1});
+        child = child.nextElementSibling;
+        counter++;
+        if(counter > 10){
+            console.log('counter > 10');
+            return;
+        }
+    }
+}
+
+//"項目5" の "5" を 抽出する
+function gettNumOfTargetDataset(dataset){
+    return dataset.querySelector("input[name='label[]']").placeholder.replace(/[^0-9]/g, '');
 }
 
 function setGraphData(){

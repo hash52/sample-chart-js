@@ -67,7 +67,9 @@ function appendDataset() {
     clone.querySelector("input[name='label[]']").placeholder = replaceTemplate(numOfDatasetString, { numOfDataset: countNumOfDataset() + 1 })
     clone.querySelector('input[name="remove-dataset"]').addEventListener('click', function (e) {
         removeDataset(e);
-        elDrawButton.click();
+        if(graph){
+            elDrawButton.click();
+        }
     })
     fragment.appendChild(clone);
     document.getElementById('datasets').appendChild(fragment);

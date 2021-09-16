@@ -80,10 +80,13 @@ function removeDataset(event) {
     removedDataset.parentNode.removeChild(removedDataset);
 }
 
+ //項目数を取得する
 function countNumOfDataset() {
     return document.getElementsByClassName('dataset').length;
 }
 
+//引数で渡した項目の後ろにある項目"項目3/項目4/項目5/.." を全て -1 する
+//例、引数に項目2を渡す・・項目3/項目4/項目5/.. => 項目2/項目3/項目4/..
 function rewriteBehindNumOfDataset(elDataset) {
     let child = elDataset.nextElementSibling;
     let counter = 0;

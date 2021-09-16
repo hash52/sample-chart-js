@@ -41,7 +41,8 @@ window.onload = function () {
         }
 
         if(graph){
-            graph.update(config);
+            graph.config = config;
+            graph.update();
         }else{
             graph = new Chart(
                 document.getElementById('myChart'),

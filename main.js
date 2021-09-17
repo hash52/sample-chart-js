@@ -27,16 +27,25 @@ let elDatasetTemplate;
 let elDrawButton;
 let elAddDatasetButton;
 
-const noTitle = '無題';
-const numOfDatasetString = "項目${numOfDataset}";
-const labelString = "${label} (${percentage}%)";
-const fractionDigits = 2;
+const DEFAULT_TITLE = '無題';
+const LABEL_PLACEHOLDER = '項目${numOfDataset}';
+const LABEL_FORMAT = '${label} (${percentage}%)';
+const FRACTION_DIGITS = 2; //小数点以下桁数
 
 window.onload = function () {
-    setElements();
+    setElementsToVals();
+    setEventListenersToInitialElements();
+}
 
+function setElementsToVals() {
+    elDatasetTemplate = document.getElementById('dataset-template').content;
+    elDrawButton = document.getElementById('draw');
+    elAddDatasetButton = document.getElementById('add-dataset');
+}
+
+function setEventListenersToInitialElements() {
     elDrawButton.addEventListener('click', function () {
-        setGraphData();
+        setDatasetsToGraphConfig();
 
         if (graph) {
             graph.config = config;
@@ -51,93 +60,85 @@ window.onload = function () {
     });
 
     elAddDatasetButton.addEventListener('click', function () {
-        appendDataset()
+        appendDataset();
     });
 }
 
-
-function setElements() {
-    elDatasetTemplate = document.getElementById("dataset-template").content;
-    elDrawButton = document.getElementById('draw');
-    elAddDatasetButton = document.getElementById('add-dataset');
+function appendDataset() {
+    let elDataset = generateElDatasetFromTemplate();
+    document.getElementById('datasets').appendChild(elDataset);
 }
 
-function appendDataset() {
-    let fragment = document.createDocumentFragment();
-    let clone = document.importNode(elDatasetTemplate, true);
-    clone.querySelector("input[name='label[]']").placeholder = replaceTemplate(numOfDatasetString, { numOfDataset: countNumOfDataset() + 1 })
-    clone.querySelector('input[name="remove-dataset"]').addEventListener('click', function (e) {
-        removeDataset(e);
+function generateElDatasetFromTemplate() {
+    let elDataset = document.importNode(elDatasetTemplate, true);
+    elDataset.querySelector('input[name="label[]"]').placeholder = replaceTemplate(LABEL_PLACEHOLDER, { numOfDataset: countDatasets() + 1 });
+    setEventListenerIn(elDataset);
+    return elDataset;
+}
+
+function setEventListenerIn(elDataset){
+    elDataset.querySelector('input[name="remove-dataset"]').addEventListener('click', function (event) {
+        let removedDataset = findParentDatasetBy(event);
+        rewriteLabelsPlaceholdersBehind(removedDataset);
+        removeDataset(removedDataset);
         if (graph) {
             elDrawButton.click();
         }
-    })
-    fragment.appendChild(clone);
-    document.getElementById('datasets').appendChild(fragment);
+    });
 }
 
-function removeDataset(event) {
+function removeDataset(elRemovedDataset) {
+    elRemovedDataset.parentNode.removeChild(elRemovedDataset);
+}
+
+function findParentDatasetBy(event) {
     let i = 0;
     while (!event.path[i].classList.contains('dataset')) {
         i++;
     }
-    let removedDataset = event.path[i];
-    rewriteBehindNumOfDataset(removedDataset);
-    removedDataset.parentNode.removeChild(removedDataset);
+    return event.path[i];
+
 }
 
 //項目数を取得する
-function countNumOfDataset() {
+function countDatasets() {
     return document.getElementsByClassName('dataset').length;
 }
 
-//引数で渡した項目の後ろにある項目"項目3/項目4/項目5/.." を全て -1 する
+//引数で渡した項目の後ろにある項目'項目3/項目4/項目5/..' を全て -1 する
 //例、引数に項目2を渡す・・項目3/項目4/項目5/.. => 項目2/項目3/項目4/..
-function rewriteBehindNumOfDataset(elDataset) {
+function rewriteLabelsPlaceholdersBehind(elDataset) {
     let child = elDataset.nextElementSibling;
-    let counter = 0;
     while (child) {
-        child.querySelector("input[name='label[]']").placeholder = replaceTemplate(numOfDatasetString, { numOfDataset: gettNumOfTargetDataset(child) - 1 });
+        let labelInput = child.querySelector('input[name="label[]"]');
+        labelInput.placeholder = replaceTemplate(LABEL_PLACEHOLDER, { numOfDataset: extractNumFromString(labelInput.placeholder) - 1 });
         child = child.nextElementSibling;
-        counter++;
-        if (counter > 10) {
-            console.log('counter > 10');
-            return;
-        }
     }
 }
 
-//"項目5" の "5" を 抽出する
-function gettNumOfTargetDataset(dataset) {
-    return dataset.querySelector("input[name='label[]']").placeholder.replace(/[^0-9]/g, '');
+//文字列から数字のみを抽出する
+function extractNumFromString(str) {
+    return str.replace(/[^0-9]/g, '');
 }
 
-function setGraphData() {
+function setDatasetsToGraphConfig() {
     let graph_setting = document.forms['graph-setting'];
-    //title未入力時はnoTitleをタイトルにする
-    config.options.title.text = graph_setting.elements['title'].value ? graph_setting.elements['title'].value : noTitle;
-    data.labels = [];
-    data.datasets[0].data = [];
-    data.datasets[0].backgroundColor = [];
-
-    if (graph_setting.elements['label[]'] instanceof RadioNodeList) {
-        //FIXME
-        //data.labels = graph_setting.elements['label[]'].values みたいな感じでループを回さずに取りたい
-        for (let i = 0; i < graph_setting.getElementsByClassName('dataset').length; i++) {
-            //label未入力時はnumOfDatasetStringをlabelにする
-            data.labels.push(graph_setting.elements['label[]'][i].value ? graph_setting.elements['label[]'][i].value : graph_setting.getElementsByClassName('dataset')[i].querySelector("input[name='label[]']").placeholder)
-            data.datasets[0].backgroundColor.push(graph_setting.elements['color[]'][i].value)
-            data.datasets[0].data.push(Number(graph_setting.elements['data[]'][i].value))
-        }
-    } else {
-        //FIXME
-        //if-elseでほぼ処理が同じ
-        data.labels.push(graph_setting.elements['label[]'].value ? graph_setting.elements['label[]'].value : replaceTemplate(numOfDatasetString, { numOfDataset: 1 }))
-        data.datasets[0].backgroundColor.push(graph_setting.elements['color[]'].value)
-        data.datasets[0].data.push(Number(graph_setting.elements['data[]'].value))
-    }
+    //title未入力時はDEFAULT_TITLEをタイトルにする
+    config.options.title.text = graph_setting.elements['title'].value ? graph_setting.elements['title'].value : DEFAULT_TITLE;
+    data.labels = getInputVlues('label[]');
+    data.datasets[0].data = getInputVlues('data[]').map(function (d) { return Number(d) });
+    data.datasets[0].backgroundColor = getInputVlues('color[]');
 
     setPercentageToLabel();
+}
+
+function getInputVlues(name) {
+    let array = [];
+    document.getElementsByName(name).forEach(function (input) {
+        array.push(input.value ? input.value : input.placeholder);
+    });
+    return array;
+
 }
 
 function setPercentageToLabel() {
@@ -147,26 +148,26 @@ function setPercentageToLabel() {
     });
     if (total > 0) {
         for (let i = 0; i < data.labels.length; i++) {
-            data.labels[i] = replaceTemplate(labelString, { label: data.labels[i], percentage: formatPercent(getPercent(data.datasets[0].data[i], total))})
+            data.labels[i] = replaceTemplate(LABEL_FORMAT, { label: data.labels[i], percentage: formatPercent(getPercent(data.datasets[0].data[i], total)) });
         }
     }
 }
 
-function formatPercent(percent){
-    return (percent * 100).toFixed(fractionDigits);
+function formatPercent(percent) {
+    return (percent * 100).toFixed(FRACTION_DIGITS);
 }
 
-function getPercent(part, whole){
+function getPercent(part, whole) {
     return part / whole;
 }
 
 /*
-    args1: "My name is ${hoge}. I'm ${age}." , args2: {hoge: "Yamazaki", age: 27})
-    return "My name is Yamazaki. I'm 27."
+    args1: 'My name is ${hoge}. I'm ${age}.' , args2: {hoge: 'Yamazaki', age: 27})
+    return 'My name is Yamazaki. I'm 27.'
 */
 function replaceTemplate(string, values) {
     return string.replace(/\$\{(.*?)\}/g, function (all, key) {
-        return Object.prototype.hasOwnProperty.call(values, key) ? values[key] : "";
+        return Object.prototype.hasOwnProperty.call(values, key) ? values[key] : '';
     });
 }
 

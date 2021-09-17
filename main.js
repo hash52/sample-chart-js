@@ -21,15 +21,16 @@ const config = {
     options: options
 };
 
-const noTitle = '無題';
-
 let graph;
 
 let elDatasetTemplate;
 let elDrawButton;
 let elAddDatasetButton;
 
+const noTitle = '無題';
 const numOfDatasetString = "項目${numOfDataset}";
+const labelString = "${label} (${percentage}%)";
+const fractionDigits = 2;
 
 window.onload = function () {
     setElements();
@@ -67,7 +68,7 @@ function appendDataset() {
     clone.querySelector("input[name='label[]']").placeholder = replaceTemplate(numOfDatasetString, { numOfDataset: countNumOfDataset() + 1 })
     clone.querySelector('input[name="remove-dataset"]').addEventListener('click', function (e) {
         removeDataset(e);
-        if(graph){
+        if (graph) {
             elDrawButton.click();
         }
     })
@@ -126,13 +127,37 @@ function setGraphData() {
             //label未入力時はnumOfDatasetStringをlabelにする
             data.labels.push(graph_setting.elements['label[]'][i].value ? graph_setting.elements['label[]'][i].value : graph_setting.getElementsByClassName('dataset')[i].querySelector("input[name='label[]']").placeholder)
             data.datasets[0].backgroundColor.push(graph_setting.elements['color[]'][i].value)
-            data.datasets[0].data.push(graph_setting.elements['data[]'][i].value)
+            data.datasets[0].data.push(Number(graph_setting.elements['data[]'][i].value))
         }
     } else {
+        //FIXME
+        //if-elseでほぼ処理が同じ
         data.labels.push(graph_setting.elements['label[]'].value ? graph_setting.elements['label[]'].value : replaceTemplate(numOfDatasetString, { numOfDataset: 1 }))
         data.datasets[0].backgroundColor.push(graph_setting.elements['color[]'].value)
-        data.datasets[0].data.push(graph_setting.elements['data[]'].value)
+        data.datasets[0].data.push(Number(graph_setting.elements['data[]'].value))
     }
+
+    setPercentageToLabel();
+}
+
+function setPercentageToLabel() {
+    let total = 0;
+    data.datasets[0].data.forEach(function (d) {
+        total += d;
+    });
+    if (total > 0) {
+        for (let i = 0; i < data.labels.length; i++) {
+            data.labels[i] = replaceTemplate(labelString, { label: data.labels[i], percentage: formatPercent(getPercent(data.datasets[0].data[i], total))})
+        }
+    }
+}
+
+function formatPercent(percent){
+    return (percent * 100).toFixed(fractionDigits);
+}
+
+function getPercent(part, whole){
+    return part / whole;
 }
 
 /*
